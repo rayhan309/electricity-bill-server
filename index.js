@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const app = express();
 const port = 3000;
 
@@ -25,12 +25,46 @@ const run = async () => {
   try {
     // clinet
     const electicty = client.db("electicty");
-    const productsCollections = electicty.collection("productsCollections");
+    const slidesCollections = electicty.collection("slides");
+    const categoryCollections = electicty.collection("category");
 
-    app.post('/products', async (req, res) => {
-        const newProduct = req.body;
-        const result = await productsCollections.insertOne(newProduct);
-        res.send(result);
+    app.post("/slides", async (req, res) => {
+      const newProduct = req.body;
+      const result = await slidesCollections.insertOne(newProduct);
+      res.send(result);
+    });
+
+    app.get("/slides", async (req, res) => {
+      console.log("ok console");
+      const query = slidesCollections.find();
+      const result = await query.toArray();
+      res.send(result);
+    });
+
+    app.post("/category", async (req, res) => {
+      const newProduct = req.body;
+      console.log("ok console");
+      const result = await categoryCollections.insertOne(newProduct);
+      res.send(result);
+    });
+
+    app.get("/category", async (req, res) => {
+      const query = categoryCollections.find();
+      const result = await query.toArray();
+      res.send(result);
+    });
+
+    app.get("/category/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = {_id: new ObjectId(id)}
+      const result = await categoryCollections.findOne(query);
+      res.send(result);
+    });
+
+    app.get("/categories/limit", async (req, res) => {
+      const query = categoryCollections.find().limit(6);
+      const result = await query.toArray();
+      res.send(result);
     });
 
     await client.connect();
@@ -52,3 +86,4 @@ app.get("/", (req, res) => {
 app.listen(port, () => {
   console.log(`This Server Is Running! ${port}`);
 });
+
