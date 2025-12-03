@@ -27,6 +27,7 @@ const run = async () => {
     const electicty = client.db("electicty");
     const slidesCollections = electicty.collection("slides");
     const categoryCollections = electicty.collection("category");
+    const pyBillsColections = electicty.collection("pyBills");
 
     app.post("/slides", async (req, res) => {
       const newProduct = req.body;
@@ -41,6 +42,7 @@ const run = async () => {
       res.send(result);
     });
 
+    // category 
     app.post("/category", async (req, res) => {
       const newProduct = req.body;
       console.log("ok console");
@@ -64,6 +66,25 @@ const run = async () => {
     app.get("/categories/limit", async (req, res) => {
       const query = categoryCollections.find().limit(6);
       const result = await query.toArray();
+      res.send(result);
+    });
+
+    // py biill
+    app.post('/pyBills', async (req, res) => {
+      const newPyBill = req.body;
+      const result = await pyBillsColections.insertOne(newPyBill);
+      res.send(result); 
+    });
+
+    app.get('/pyBills', async (req, res) => {
+      const userEmail = req.query.email;
+      const query = {};
+      if(userEmail) {
+        console.log(userEmail)
+        query.email = userEmail;
+      }
+      const allPyBills = pyBillsColections.find(query);
+      const result = await allPyBills.toArray();
       res.send(result);
     });
 
