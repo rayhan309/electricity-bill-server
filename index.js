@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
+// const { messaging } = require("firebase-admin");
 const app = express();
 const port = 3000;
 
@@ -30,7 +31,40 @@ const run = async () => {
     const pyBillsColections = electicty.collection("pyBills");
     const aiColections = electicty.collection("aiMonthly");
     const analyticsColections = electicty.collection("analytics");
+    const userCollection = electicty.collection("users");
 
+    // users
+    app.post("/users", async (req, res) => {
+      const newUser = req.body;
+      const email = req.body.email;
+      const query = { email: email };
+      const existingUser = await userCollection.findOne(query);
+
+      if (existingUser) {
+        res.send({
+          message: "this user alrady exists, do not need to insert aging",
+        });
+      } else {
+        const result = await userCollection.insertOne(newUser);
+        res.send(result);
+      }
+    });
+
+    // user get
+    app.get("/users", async (req, res) => {
+      const userEmail = req.query.email;
+      const query = {}
+      if (userEmail) {
+        query.email = userEmail;
+        console.log(userEmail, "mammammamamammama");
+        const result = await categoryCollections.findOne(query);
+        res.send(result);
+      }else{
+        res.status(401).send({message: "not allow data access!"})
+      }
+    });
+
+    // slides
     app.post("/slides", async (req, res) => {
       const newProduct = req.body;
       const result = await slidesCollections.insertOne(newProduct);
@@ -38,7 +72,7 @@ const run = async () => {
     });
 
     app.get("/slides", async (req, res) => {
-      console.log("ok console");
+      // console.log("ok console");
       const query = slidesCollections.find();
       const result = await query.toArray();
       res.send(result);
@@ -83,7 +117,7 @@ const run = async () => {
       const userEmail = req.query.email;
       const query = {};
       if (userEmail) {
-        console.log(userEmail);
+        // console.log(userEmail);
         query.email = userEmail;
       }
       const allPyBills = pyBillsColections.find(query);
@@ -96,12 +130,14 @@ const run = async () => {
       const id = req.params.id;
       const updatePyBill = req.body;
       const query = { _id: new ObjectId(id) };
-      const updateBill = { $set: {
-        name: updatePyBill.name,
-        date: updatePyBill.date,
-        phone: updatePyBill.phone,
-        address: updatePyBill.address
-      }}
+      const updateBill = {
+        $set: {
+          name: updatePyBill.name,
+          date: updatePyBill.date,
+          phone: updatePyBill.phone,
+          address: updatePyBill.address,
+        },
+      };
       const result = await pyBillsColections.updateOne(query, updateBill);
       res.send(result);
     });
@@ -120,7 +156,7 @@ const run = async () => {
     });
 
     app.get("/aiMonthly", async (req, res) => {
-      console.log("ok console");
+      // console.log("ok console");
       const query = aiColections.find();
       const result = await query.toArray();
       res.send(result);
@@ -133,7 +169,7 @@ const run = async () => {
     });
 
     app.get("/analytics", async (req, res) => {
-      console.log("ok console");
+      // console.log("ok console");
       const query = analyticsColections.find();
       const result = await query.toArray();
       res.send(result);
