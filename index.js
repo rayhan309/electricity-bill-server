@@ -28,6 +28,8 @@ const run = async () => {
     const slidesCollections = electicty.collection("slides");
     const categoryCollections = electicty.collection("category");
     const pyBillsColections = electicty.collection("pyBills");
+    const aiColections = electicty.collection("aiMonthly");
+    const analyticsColections = electicty.collection("analytics");
 
     app.post("/slides", async (req, res) => {
       const newProduct = req.body;
@@ -42,10 +44,11 @@ const run = async () => {
       res.send(result);
     });
 
-    // category 
+    // category
     app.post("/category", async (req, res) => {
       const newProduct = req.body;
-      console.log("ok console");
+      // console.log("ok console");
+      newProduct.date = new Date(newProduct.date);
       const result = await categoryCollections.insertOne(newProduct);
       res.send(result);
     });
@@ -58,7 +61,7 @@ const run = async () => {
 
     app.get("/category/:id", async (req, res) => {
       const id = req.params.id;
-      const query = {_id: new ObjectId(id)}
+      const query = { _id: new ObjectId(id) };
       const result = await categoryCollections.findOne(query);
       res.send(result);
     });
@@ -70,17 +73,17 @@ const run = async () => {
     });
 
     // py biill
-    app.post('/pyBills', async (req, res) => {
+    app.post("/pyBills", async (req, res) => {
       const newPyBill = req.body;
       const result = await pyBillsColections.insertOne(newPyBill);
-      res.send(result); 
+      res.send(result);
     });
 
-    app.get('/pyBills', async (req, res) => {
+    app.get("/pyBills", async (req, res) => {
       const userEmail = req.query.email;
       const query = {};
-      if(userEmail) {
-        console.log(userEmail)
+      if (userEmail) {
+        console.log(userEmail);
         query.email = userEmail;
       }
       const allPyBills = pyBillsColections.find(query);
@@ -88,9 +91,57 @@ const run = async () => {
       res.send(result);
     });
 
+    // puct
+    app.patch("/pyBills/:id", async (req, res) => {
+      const id = req.params.id;
+      const updatePyBill = req.body;
+      const query = { _id: new ObjectId(id) };
+      const updateBill = { $set: {
+        name: updatePyBill.name,
+        date: updatePyBill.date,
+        phone: updatePyBill.phone,
+        address: updatePyBill.address
+      }}
+      const result = await pyBillsColections.updateOne(query, updateBill);
+      res.send(result);
+    });
+
+    app.delete("/pyBills/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await pyBillsColections.deleteOne(query);
+      res.send(result);
+    });
+
+    app.post("/aiMonthly", async (req, res) => {
+      const newProduct = req.body;
+      const result = await aiColections.insertOne(newProduct);
+      res.send(result);
+    });
+
+    app.get("/aiMonthly", async (req, res) => {
+      console.log("ok console");
+      const query = aiColections.find();
+      const result = await query.toArray();
+      res.send(result);
+    });
+
+    app.post("/analytics", async (req, res) => {
+      const newProduct = req.body;
+      const result = await analyticsColections.insertOne(newProduct);
+      res.send(result);
+    });
+
+    app.get("/analytics", async (req, res) => {
+      console.log("ok console");
+      const query = analyticsColections.find();
+      const result = await query.toArray();
+      res.send(result);
+    });
+
     await client.connect();
 
-    await client.db("admin").command({ ping: 1 });
+    // await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
@@ -107,4 +158,3 @@ app.get("/", (req, res) => {
 app.listen(port, () => {
   console.log(`This Server Is Running! ${port}`);
 });
-
